@@ -27,6 +27,10 @@
 		82CCE3BC1F0B0A39009B67F9 /* SKTEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CCE3B01F0B0A2E009B67F9 /* SKTEffects.swift */; };
 		82CCE3BD1F0B0A39009B67F9 /* SKTTimingFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CCE3B11F0B0A2E009B67F9 /* SKTTimingFunctions.swift */; };
 		82CCE3BE1F0B0A39009B67F9 /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CCE3B21F0B0A2E009B67F9 /* Vector3.swift */; };
+		BA0A044521A8A0B400416B1F /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044421A8A0B400416B1F /* Player.swift */; };
+		BA0A044721A8C33400416B1F /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044621A8C33400416B1F /* Types.swift */; };
+		BA0A044921A8C43500416B1F /* Animatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044821A8C43500416B1F /* Animatable.swift */; };
+		BA0A044B21A8CE5E00416B1F /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044A21A8CE5E00416B1F /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +56,10 @@
 		82CCE3B01F0B0A2E009B67F9 /* SKTEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKTEffects.swift; sourceTree = "<group>"; };
 		82CCE3B11F0B0A2E009B67F9 /* SKTTimingFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKTTimingFunctions.swift; sourceTree = "<group>"; };
 		82CCE3B21F0B0A2E009B67F9 /* Vector3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector3.swift; sourceTree = "<group>"; };
+		BA0A044421A8A0B400416B1F /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		BA0A044621A8C33400416B1F /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		BA0A044821A8C43500416B1F /* Animatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animatable.swift; sourceTree = "<group>"; };
+		BA0A044A21A8CE5E00416B1F /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,10 +95,13 @@
 			isa = PBXGroup;
 			children = (
 				824441721D3C5E8F005ECB76 /* AppDelegate.swift */,
+				BA0A044621A8C33400416B1F /* Types.swift */,
+				BA0A044A21A8CE5E00416B1F /* Extensions.swift */,
 				82CCE3A61F0B0A2E009B67F9 /* SKTUtils */,
 				8244417A1D3C5E8F005ECB76 /* GameViewController.swift */,
 				824441741D3C5E8F005ECB76 /* GameScene.sks */,
 				824441781D3C5E8F005ECB76 /* GameScene.swift */,
+				BA0A044321A8A09700416B1F /* Characters */,
 				825EF27E1F0B16A60091577D /* TileSets.sks */,
 				8244417F1D3C5E8F005ECB76 /* Assets.xcassets */,
 				8244418A1D3C5FE1005ECB76 /* Storyboards */,
@@ -125,6 +136,15 @@
 				82CCE3B21F0B0A2E009B67F9 /* Vector3.swift */,
 			);
 			path = SKTUtils;
+			sourceTree = "<group>";
+		};
+		BA0A044321A8A09700416B1F /* Characters */ = {
+			isa = PBXGroup;
+			children = (
+				BA0A044421A8A0B400416B1F /* Player.swift */,
+				BA0A044821A8C43500416B1F /* Animatable.swift */,
+			);
+			path = Characters;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -205,14 +225,18 @@
 				824441791D3C5E8F005ECB76 /* GameScene.swift in Sources */,
 				82CCE3B41F0B0A39009B67F9 /* CGPoint+Extensions.swift in Sources */,
 				82CCE3BD1F0B0A39009B67F9 /* SKTTimingFunctions.swift in Sources */,
+				BA0A044721A8C33400416B1F /* Types.swift in Sources */,
 				82CCE3BC1F0B0A39009B67F9 /* SKTEffects.swift in Sources */,
+				BA0A044521A8A0B400416B1F /* Player.swift in Sources */,
 				82CCE3B81F0B0A39009B67F9 /* SKAction+SpecialEffects.swift in Sources */,
+				BA0A044B21A8CE5E00416B1F /* Extensions.swift in Sources */,
 				82CCE3B51F0B0A39009B67F9 /* CGVector+Extensions.swift in Sources */,
 				82CCE3B71F0B0A39009B67F9 /* SKAction+Extensions.swift in Sources */,
 				82CCE3B91F0B0A39009B67F9 /* SKColor+Extensions.swift in Sources */,
 				8244417B1D3C5E8F005ECB76 /* GameViewController.swift in Sources */,
 				82CCE3B61F0B0A39009B67F9 /* Int+Extensions.swift in Sources */,
 				82CCE3BA1F0B0A39009B67F9 /* SKNode+Extensions.swift in Sources */,
+				BA0A044921A8C43500416B1F /* Animatable.swift in Sources */,
 				82CCE3BB1F0B0A39009B67F9 /* SKTAudio.swift in Sources */,
 				82CCE3B31F0B0A39009B67F9 /* CGFloat+Extensions.swift in Sources */,
 				82CCE3BE1F0B0A39009B67F9 /* Vector3.swift in Sources */,
