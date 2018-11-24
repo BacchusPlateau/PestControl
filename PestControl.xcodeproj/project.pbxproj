@@ -31,6 +31,7 @@
 		BA0A044721A8C33400416B1F /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044621A8C33400416B1F /* Types.swift */; };
 		BA0A044921A8C43500416B1F /* Animatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044821A8C43500416B1F /* Animatable.swift */; };
 		BA0A044B21A8CE5E00416B1F /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044A21A8CE5E00416B1F /* Extensions.swift */; };
+		BA0A044D21A8DEAA00416B1F /* Bug.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA0A044C21A8DEAA00416B1F /* Bug.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,7 @@
 		BA0A044621A8C33400416B1F /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		BA0A044821A8C43500416B1F /* Animatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animatable.swift; sourceTree = "<group>"; };
 		BA0A044A21A8CE5E00416B1F /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		BA0A044C21A8DEAA00416B1F /* Bug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bug.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +145,7 @@
 			children = (
 				BA0A044421A8A0B400416B1F /* Player.swift */,
 				BA0A044821A8C43500416B1F /* Animatable.swift */,
+				BA0A044C21A8DEAA00416B1F /* Bug.swift */,
 			);
 			path = Characters;
 			sourceTree = "<group>";
@@ -236,6 +239,7 @@
 				8244417B1D3C5E8F005ECB76 /* GameViewController.swift in Sources */,
 				82CCE3B61F0B0A39009B67F9 /* Int+Extensions.swift in Sources */,
 				82CCE3BA1F0B0A39009B67F9 /* SKNode+Extensions.swift in Sources */,
+				BA0A044D21A8DEAA00416B1F /* Bug.swift in Sources */,
 				BA0A044921A8C43500416B1F /* Animatable.swift in Sources */,
 				82CCE3BB1F0B0A39009B67F9 /* SKTAudio.swift in Sources */,
 				82CCE3B31F0B0A39009B67F9 /* CGFloat+Extensions.swift in Sources */,
