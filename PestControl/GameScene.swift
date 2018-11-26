@@ -34,17 +34,103 @@ class GameScene: SKScene {
   
   var background : SKTileMapNode!
   var player = Player()
-  var bug = Bug()
+  var bugsNode = SKNode()
+  var obstaclesTileMap: SKTileMapNode?
+  var firebugCount: Int = 0
+  var bugsprayTileMap: SKTileMapNode?
+  
+  func createBugs() {
+    
+    guard let bugsMap = childNode(withName: "bugs") as? SKTileMapNode else { return }
+    
+    for row in 0..<bugsMap.numberOfRows {
+      for col in 0..<bugsMap.numberOfColumns {
+        
+        guard let tile = tile(in: bugsMap, at: (col, row))
+          else { continue }
+        
+        let bug : Bug
+        if tile.userData?.object(forKey: "firebug") != nil {
+          bug = Firebug()
+          firebugCount += 1
+        } else {
+          bug = Bug()
+        }
+        
+        bug.position = bugsMap.centerOfTile(atColumn: col, row: row)
+        bugsNode.addChild(bug)
+        bug.move()
+        
+      }
+    }
+    
+    bugsNode.name = "Bugs"
+    addChild(bugsNode)
+    bugsMap.removeFromParent()
+    
+  }
+  
+  func createBugSpray(quantity: Int) {
+    
+    let tile = SKTileDefinition(texture: SKTexture(pixelImageNamed: "bugspray"))
+    let tilerule = SKTileGroupRule(adjacency: SKTileAdjacencyMask.adjacencyAll, tileDefinitions: [tile])
+    let tilegroup = SKTileGroup(rules: [tilerule])
+    let tileset = SKTileSet(tileGroups: [tilegroup])
+    
+    let cols = background.numberOfColumns
+    let rows = background.numberOfRows
+    
+    bugsprayTileMap = SKTileMapNode(tileSet: tileset, columns: cols, rows: rows, tileSize: tile.size)
+    
+    for _ in 1...quantity {
+      let col = Int.random(min: 0, max: cols - 1)
+      let row = Int.random(min: 0, max: rows - 1)
+      bugsprayTileMap?.setTileGroup(tilegroup, forColumn: col, row: row)
+    }
+    
+    bugsprayTileMap?.name = "Bugspray"
+    addChild(bugsprayTileMap!)
+    
+  }
+  
+  func didBegin(_ contact: SKPhysicsContact) {
+    
+    let other = contact.bodyA.categoryBitMask == PhysicsCategory.Player ? contact.bodyB : contact.bodyA
+    
+    switch other.categoryBitMask {
+    case PhysicsCategory.Bug:
+      //print("bug!")
+      if let bug = other.node as? Bug {
+        remove(bug: bug)
+      }
+    case PhysicsCategory.Firebug:
+      if player.hasBugspray {
+        if let firebug = other.node as? Firebug {
+          remove(bug: firebug)
+          player.hasBugspray = false
+        }
+      }
+    default:
+      //print("\(other.node?.name ?? "z")")
+      break
+    }
+    
+    if let physicsBody = player.physicsBody {
+      if physicsBody.velocity.length() > 0 {
+        player.checkDirection()
+      }
+    }
+    
+  }
   
   override func didMove(to view: SKView) {
     
     addChild(player)
-    
-    bug.position = CGPoint(x: 60, y: 0)
-    addChild(bug)
-    
     setUpCamera()
     setUpWorldPhysics()
+    createBugs()
+    setUpObstaclesPhysics()
+    createBugSpray(quantity: firebugCount + 10)
     
   }
   
@@ -52,6 +138,7 @@ class GameScene: SKScene {
     super.init(coder: aDecoder)
     
     background = childNode(withName: "background") as? SKTileMapNode
+    obstaclesTileMap = childNode(withName: "obstacles") as? SKTileMapNode
     
   }
   
@@ -77,9 +164,52 @@ class GameScene: SKScene {
 
   }
   
+  func setUpObstaclesPhysics() {
+    
+    guard let obstaclesTileMap = obstaclesTileMap else { return }
+    
+    for row in 0..<obstaclesTileMap.numberOfRows {
+      for col in 0..<obstaclesTileMap.numberOfColumns {
+        
+        guard let tile = tile(in: obstaclesTileMap,
+                              at: (col, row))
+          else { continue }
+        
+        guard tile.userData?.object(forKey: "obstacle") != nil
+          else { continue }
+        
+        let node = SKNode()
+        node.physicsBody = SKPhysicsBody(rectangleOf: tile.size)
+        node.physicsBody?.isDynamic = false
+        node.physicsBody?.friction = 0
+        node.physicsBody?.categoryBitMask = PhysicsCategory.Breakable
+        node.position = obstaclesTileMap.centerOfTile(atColumn: col, row: row)
+        obstaclesTileMap.addChild(node)
+      }
+    }
+  
+  }
+  
   func setUpWorldPhysics() {
     
     background.physicsBody = SKPhysicsBody(edgeLoopFrom: background.frame)
+    background.physicsBody?.categoryBitMask = PhysicsCategory.Edge
+    physicsWorld.contactDelegate = self
+    
+  }
+  
+  func tile(in tileMap: SKTileMapNode, at coordiates: TileCoordinates) -> SKTileDefinition? {
+    
+    return tileMap.tileDefinition(atColumn: coordiates.column, row: coordiates.row)
+    
+  }
+  
+  func tileCoordinates(in tileMap: SKTileMapNode, at position: CGPoint) -> TileCoordinates {
+    
+    let col = tileMap.tileColumnIndex(fromPosition: position)
+    let row = tileMap.tileRowIndex(fromPosition: position)
+    
+    return (col, row)
     
   }
   
@@ -90,4 +220,40 @@ class GameScene: SKScene {
     
   }
   
+  override func update(_ currentTime: TimeInterval) {
+    
+    if !player.hasBugspray {
+      updateBugSpray()
+    }
+    
+  }
+  
+  func updateBugSpray() {
+    
+    guard let bugsprayTileMap = bugsprayTileMap else { return }
+    
+    let (column, row) = tileCoordinates(in: bugsprayTileMap, at: player.position)
+    
+    if tile(in: bugsprayTileMap, at: (column, row)) != nil {
+      
+      bugsprayTileMap.setTileGroup(nil, forColumn: column, row: row)
+      player.hasBugspray = true
+      
+    }
+    
+  }
+  
 }
+
+extension GameScene : SKPhysicsContactDelegate {
+  
+  func remove(bug: Bug) {
+    bug.removeFromParent()
+    background.addChild(bug)
+    bug.die()
+  }
+  
+}
+
+
+
