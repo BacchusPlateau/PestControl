@@ -39,6 +39,22 @@ class GameScene: SKScene {
   var firebugCount: Int = 0
   var bugsprayTileMap: SKTileMapNode?
   
+  func advanceBreakableTile(locatedAt nodePosition: CGPoint) {
+    
+    guard let obstaclesTileMap = obstaclesTileMap else { return }
+    
+    let (column, row) = tileCoordinates(in: obstaclesTileMap, at: nodePosition)
+    let obstacle = tile(in: obstaclesTileMap, at: (column, row))
+    
+    guard let nextTileGroupName = obstacle?.userData?.object(forKey: "breakable") as? String
+      else { return }
+    
+    if let nextTileGroup = tileGroupForName(tileSet: obstaclesTileMap.tileSet, name: nextTileGroupName) {
+      obstaclesTileMap.setTileGroup(nextTileGroup, forColumn: column, row: row)
+    }
+    
+  }
+  
   func createBugs() {
     
     guard let bugsMap = childNode(withName: "bugs") as? SKTileMapNode else { return }
@@ -109,6 +125,11 @@ class GameScene: SKScene {
           remove(bug: firebug)
           player.hasBugspray = false
         }
+      }
+    case PhysicsCategory.Breakable:
+      if let obstacleNode = other.node {
+        advanceBreakableTile(locatedAt: obstacleNode.position)
+        obstacleNode.removeFromParent()
       }
     default:
       //print("\(other.node?.name ?? "z")")
@@ -213,6 +234,13 @@ class GameScene: SKScene {
     
   }
   
+  func tileGroupForName(tileSet: SKTileSet, name: String) -> SKTileGroup? {
+    
+    let tileGroup = tileSet.tileGroups.filter { $0.name == name }.first
+    return tileGroup
+    
+  }
+  
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     
     guard let touch = touches.first else { return }
@@ -225,6 +253,7 @@ class GameScene: SKScene {
     if !player.hasBugspray {
       updateBugSpray()
     }
+    advanceBreakableTile(locatedAt: player.position)
     
   }
   
