@@ -38,6 +38,17 @@ class GameScene: SKScene {
   var obstaclesTileMap: SKTileMapNode?
   var firebugCount: Int = 0
   var bugsprayTileMap: SKTileMapNode?
+  var hud = HUD()
+  var timeLimit: Int = 50
+  var elapsedTime: Int = 0
+  var startTime: Int?
+  var currentLevel: Int = 1
+  
+  var gameState: GameState = .initial {
+    didSet {
+      hud.updateGameState(from: oldValue, to: gameState)
+    }
+  }
   
   func advanceBreakableTile(locatedAt nodePosition: CGPoint) {
     
@@ -51,6 +62,21 @@ class GameScene: SKScene {
     
     if let nextTileGroup = tileGroupForName(tileSet: obstaclesTileMap.tileSet, name: nextTileGroupName) {
       obstaclesTileMap.setTileGroup(nextTileGroup, forColumn: column, row: row)
+    }
+    
+  }
+  
+  func checkEndGame() {
+    if bugsNode.children.count == 0 {
+      
+      player.physicsBody?.linearDamping = 1
+      gameState = .win
+      
+    } else if timeLimit - elapsedTime <= 0 {
+      
+      player.physicsBody?.linearDamping = 1
+      gameState = .lose
+      
     }
     
   }
@@ -152,6 +178,8 @@ class GameScene: SKScene {
     createBugs()
     setUpObstaclesPhysics()
     createBugSpray(quantity: firebugCount + 10)
+    setUpHUD()
+    gameState = .start
     
   }
   
@@ -160,8 +188,13 @@ class GameScene: SKScene {
     
     background = childNode(withName: "background") as? SKTileMapNode
     obstaclesTileMap = childNode(withName: "obstacles") as? SKTileMapNode
+    if let timeLimit = userData?.object(forKey: "timeLimit") as? Int {
+      self.timeLimit = timeLimit
+    }
     
   }
+  
+  
   
   func setUpCamera() {
 
@@ -184,6 +217,14 @@ class GameScene: SKScene {
     camera.constraints = [playerConstraint, edgeConstraint]
 
   }
+  
+  func setUpHUD() {
+    
+    camera?.addChild(hud)
+    hud.addTimer(time: timeLimit)
+    
+  }
+  
   
   func setUpObstaclesPhysics() {
     
@@ -244,16 +285,51 @@ class GameScene: SKScene {
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     
     guard let touch = touches.first else { return }
-    player.move(target: touch.location(in: self))
+    
+    switch gameState {
+    case .start:
+      gameState = .play
+      isPaused = false
+      startTime = nil
+      elapsedTime = 0
+    case .play:
+      player.move(target: touch.location(in: self))
+    case .win:
+      transitionToScene(level: currentLevel + 1)
+    case .lose:
+      transitionToScene(level: 1)
+    default:
+      break
+    }
+    
+  }
+  
+  func transitionToScene(level: Int) {
+    
+    guard let newScene = SKScene(fileNamed: "Level\(level)")
+      as? GameScene else {
+        fatalError("Level\(level) not found")
+    }
+    
+    newScene.currentLevel = level
+    view?.presentScene(newScene, transition: SKTransition.flipVertical(withDuration: 0.5))
     
   }
   
   override func update(_ currentTime: TimeInterval) {
     
+    if gameState != .play {
+      isPaused = true
+      return
+    }
+    
     if !player.hasBugspray {
       updateBugSpray()
     }
+    
     advanceBreakableTile(locatedAt: player.position)
+    updateHUD(currentTime: currentTime)
+    checkEndGame()
     
   }
   
@@ -272,6 +348,18 @@ class GameScene: SKScene {
     
   }
   
+  func updateHUD(currentTime: TimeInterval) {
+    
+    if let startTime = startTime {
+      elapsedTime = Int(currentTime) - startTime
+    } else {
+      startTime = Int(currentTime) - elapsedTime
+    }
+   
+    hud.updateTimer(time: timeLimit - elapsedTime)
+    
+  }
+  
 }
 
 extension GameScene : SKPhysicsContactDelegate {
@@ -281,6 +369,12 @@ extension GameScene : SKPhysicsContactDelegate {
     background.addChild(bug)
     bug.die()
   }
+  
+}
+
+extension GameScene {
+  
+    
   
 }
 
