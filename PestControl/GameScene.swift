@@ -245,6 +245,7 @@ class GameScene: SKScene {
     
     camera?.addChild(hud)
     hud.addTimer(time: timeLimit)
+    hud.addBugCounter(bugCount: bugsNode.children.count)
     
   }
   
@@ -390,7 +391,7 @@ class GameScene: SKScene {
     }
    
     hud.updateTimer(time: timeLimit - elapsedTime)
-    
+    hud.updateBugCounter(bugCount: bugsNode.children.count)
   }
   
 }
@@ -422,7 +423,7 @@ extension GameScene {
   
   class func loadGame() -> SKScene? {
     
-    print("* loading game")
+    //print("* loading game")
     var scene: SKScene?
     
     let fileManager = FileManager.default
@@ -453,7 +454,7 @@ extension GameScene {
     }
     
     let fileURL = saveURL.appendingPathComponent("saved-game")
-    print("* saving: \(fileURL.path)")
+    //print("* saving: \(fileURL.path)")
     NSKeyedArchiver.archiveRootObject(self, toFile: fileURL.path)
     
   }
