@@ -11,7 +11,7 @@ import SpriteKit
 class Firebug : Bug {
   
   required init?(coder aDecoder: NSCoder) {
-    fatalError("Use init()")
+    super.init(coder: aDecoder)
   }
   
   override init() {

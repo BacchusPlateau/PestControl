@@ -101,7 +101,7 @@ class GameScene: SKScene {
         
         bug.position = bugsMap.centerOfTile(atColumn: col, row: row)
         bugsNode.addChild(bug)
-        bug.move()
+        bug.moveBug()
         
       }
     }
@@ -172,14 +172,20 @@ class GameScene: SKScene {
   
   override func didMove(to view: SKView) {
     
-    addChild(player)
+    if gameState == .initial {
+      addChild(player)
+      
+      setUpWorldPhysics()
+      createBugs()
+      setUpObstaclesPhysics()
+      if (firebugCount > 0) {
+        createBugSpray(quantity: firebugCount + 10)
+      }
+      setUpHUD()
+      gameState = .start
+    }
+    
     setUpCamera()
-    setUpWorldPhysics()
-    createBugs()
-    setUpObstaclesPhysics()
-    createBugSpray(quantity: firebugCount + 10)
-    setUpHUD()
-    gameState = .start
     
   }
   
@@ -191,6 +197,23 @@ class GameScene: SKScene {
     if let timeLimit = userData?.object(forKey: "timeLimit") as? Int {
       self.timeLimit = timeLimit
     }
+    
+    let savedGameState = aDecoder.decodeInteger(forKey: "Scene.gameState")
+    if let gameState = GameState(rawValue: savedGameState), gameState == .pause {
+      
+      self.gameState = gameState
+      firebugCount = aDecoder.decodeInteger(forKey: "Scene.firebugCount")
+      elapsedTime = aDecoder.decodeInteger(forKey: "Scene.elapsedTime")
+      currentLevel = aDecoder.decodeInteger(forKey: "Scene.currentLevel")
+    
+      player = childNode(withName: "Player") as! Player
+      hud = camera!.childNode(withName: "HUD") as! HUD
+      bugsNode = childNode(withName: "Bugs")!
+      bugsprayTileMap = childNode(withName: "Bugspray") as? SKTileMapNode
+    
+    }
+    
+    addObservers()
     
   }
   
@@ -287,6 +310,16 @@ class GameScene: SKScene {
     guard let touch = touches.first else { return }
     
     switch gameState {
+    case .reload:
+      if let touchedNode = atPoint(touch.location(in: self)) as? SKLabelNode {
+        if touchedNode.name == HUDMessage.yes {
+          isPaused = false
+          startTime = nil
+          gameState = .play
+        } else if touchedNode.name == HUDMessage.no {
+          transitionToScene(level: 1)
+        }
+      }
     case .start:
       gameState = .play
       isPaused = false
@@ -362,6 +395,7 @@ class GameScene: SKScene {
   
 }
 
+// MARK: Physics Contact
 extension GameScene : SKPhysicsContactDelegate {
   
   func remove(bug: Bug) {
@@ -372,9 +406,107 @@ extension GameScene : SKPhysicsContactDelegate {
   
 }
 
+// MARK: Saving Game
 extension GameScene {
   
+  override func encode(with aCoder: NSCoder) {
     
+    aCoder.encode(firebugCount, forKey: "Scene.firebugCount")
+    aCoder.encode(elapsedTime, forKey: "Scene.elapsedTime")
+    aCoder.encode(gameState.rawValue, forKey: "Scene.gameState")
+    aCoder.encode(currentLevel, forKey: "Scene.currentLevel")
+    
+    super.encode(with: aCoder)
+    
+  }
+  
+  class func loadGame() -> SKScene? {
+    
+    print("* loading game")
+    var scene: SKScene?
+    
+    let fileManager = FileManager.default
+    guard let directory = fileManager.urls(for: .libraryDirectory, in: .userDomainMask).first
+      else { return nil }
+    
+    let url = directory.appendingPathComponent("SavedGame/saved-game")
+    if FileManager.default.fileExists(atPath: url.path) {
+      scene = NSKeyedUnarchiver.unarchiveObject(withFile: url.path) as? GameScene
+      _ = try? fileManager.removeItem(at: url)
+    }
+    
+    return scene
+    
+  }
+  
+  func saveGame() {
+    
+    let fileManager = FileManager.default
+    guard let directory = fileManager.urls(for: .libraryDirectory, in: .userDomainMask).first
+      else { return }
+    
+    let saveURL = directory.appendingPathComponent("SavedGame")
+    do {
+      try fileManager.createDirectory(atPath: saveURL.path, withIntermediateDirectories: true, attributes: nil)
+    } catch let error as NSError {
+      fatalError("Failed to create directory: \(error.debugDescription)")
+    }
+    
+    let fileURL = saveURL.appendingPathComponent("saved-game")
+    print("* saving: \(fileURL.path)")
+    NSKeyedArchiver.archiveRootObject(self, toFile: fileURL.path)
+    
+  }
+  
+}
+
+// MARK: Observers
+extension GameScene {
+  
+  func addObservers() {
+    
+    let notificationCenter = NotificationCenter.default
+    
+    notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive,
+                                   object: nil,
+                                   queue: nil) { [weak self] _ in self?.applicationDidBecomeActive() }
+    
+    notificationCenter.addObserver(forName: .UIApplicationWillResignActive,
+                                   object: nil,
+                                   queue: nil) { [weak self] _ in self?.applicationWillResignActive() }
+    
+    notificationCenter.addObserver(forName: .UIApplicationDidEnterBackground,
+                                   object: nil,
+                                   queue: nil) { [weak self] _ in self?.applicationDidEnterBackground() }
+    
+  }
+  
+  func applicationDidBecomeActive() {
+    
+    //print("* applicationDidBecomeActive")
+    
+    if gameState == .pause {
+      gameState = .reload
+    }
+    //print("\(gameState)")
+  }
+  
+  func applicationDidEnterBackground() {
+    //print("* applicationDidEnterBackground")
+    if gameState != .lose {
+      saveGame()
+    }
+  }
+  
+  func applicationWillResignActive() {
+    
+    //print("* applicationWillResignActive")
+    
+    if gameState != .lose {
+      gameState = .pause
+    }
+    
+  }
   
 }
 

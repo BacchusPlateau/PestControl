@@ -58,6 +58,10 @@ class HUD : SKNode {
   private func clearUI(gameState: GameState) {
     
     switch gameState {
+    case .reload:
+      remove(message: HUDMessage.reload)
+      remove(message: HUDMessage.yes)
+      remove(message: HUDMessage.no)
     case .win:
       remove(message: HUDMessage.win)
       remove(message: HUDMessage.nextLevel)
@@ -79,6 +83,7 @@ class HUD : SKNode {
   
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+    timerLabel = childNode(withName: "Timer") as? SKLabelNode
   }
   
   private func remove(message: String) {
@@ -102,6 +107,10 @@ class HUD : SKNode {
   private func updateUI(gameState: GameState) {
     
     switch gameState {
+    case .reload:
+      add(message: HUDMessage.reload, position: .zero, fontSize: 40)
+      add(message: HUDMessage.yes, position: CGPoint(x: -140, y: -100))
+      add(message: HUDMessage.no, position: CGPoint(x: 130, y: -100))
     case .win:
       add(message: HUDMessage.win, position: .zero)
       add(message: HUDMessage.nextLevel, position: CGPoint(x: 0, y: -100))
