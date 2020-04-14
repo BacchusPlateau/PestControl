@@ -432,6 +432,7 @@ extension GameScene {
     
     let url = directory.appendingPathComponent("SavedGame/saved-game")
     if FileManager.default.fileExists(atPath: url.path) {
+      
       scene = NSKeyedUnarchiver.unarchiveObject(withFile: url.path) as? GameScene
       _ = try? fileManager.removeItem(at: url)
     }
@@ -455,8 +456,15 @@ extension GameScene {
     
     let fileURL = saveURL.appendingPathComponent("saved-game")
     //print("* saving: \(fileURL.path)")
-    NSKeyedArchiver.archiveRootObject(self, toFile: fileURL.path)
+    //NSKeyedArchiver.archiveRootObject(self, toFile: fileURL.path)
     
+    do {
+      let data = try NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: false)
+      try data.write(to: fileURL)
+    } catch {
+      print ("save failed")
+      
+    }
   }
   
 }
@@ -468,15 +476,15 @@ extension GameScene {
     
     let notificationCenter = NotificationCenter.default
     
-    notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive,
+    notificationCenter.addObserver(forName: UIApplication.didBecomeActiveNotification,
                                    object: nil,
                                    queue: nil) { [weak self] _ in self?.applicationDidBecomeActive() }
     
-    notificationCenter.addObserver(forName: .UIApplicationWillResignActive,
+    notificationCenter.addObserver(forName: UIApplication.willResignActiveNotification,
                                    object: nil,
                                    queue: nil) { [weak self] _ in self?.applicationWillResignActive() }
     
-    notificationCenter.addObserver(forName: .UIApplicationDidEnterBackground,
+    notificationCenter.addObserver(forName: UIApplication.didEnterBackgroundNotification,
                                    object: nil,
                                    queue: nil) { [weak self] _ in self?.applicationDidEnterBackground() }
     
